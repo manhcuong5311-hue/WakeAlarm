@@ -3,9 +3,9 @@ import Combine
 
 /// The three escalation phases of the alarm
 enum PunishmentPhase: Int {
-    case phase1 = 1   // 0–30s  – normal loud
-    case phase2 = 2   // 30–60s – ramp volume + haptics + red flash
-    case phase3 = 3   // 60s+   – max everything + urgent message
+    case phase1 = 1   // 0–30 s  — loud audio + haptic phase 1
+    case phase2 = 2   // 30–60 s — ramped audio + haptic phase 2 + red flash
+    case phase3 = 3   // 60 s+   — max everything + haptic phase 3 + urgent message
 }
 
 /// Drives the timed escalation system when the alarm fires.
@@ -16,54 +16,59 @@ final class PunishmentEngine: ObservableObject {
     static let shared = PunishmentEngine()
     private init() {}
 
-    /// UserDefaults key set while an alarm is actively ringing.
-    /// Lets us detect force-quit / crash on the next launch.
-    static let kAlarmInProgress = "wakelock.alarmInProgress"
+    // MARK: - UserDefaults keys
 
-    @Published private(set) var phase: PunishmentPhase = .phase1
-    @Published private(set) var elapsedSeconds: Int = 0
-    @Published private(set) var isRunning: Bool = false
+    static let kAlarmInProgress   = "wakelock.alarmInProgress"
+    static let kAlarmIdKey        = "wakelock.alarmId"
+    static let kAlarmStartTimeKey = "wakelock.alarmStartTime"
+
+    // MARK: - Published state
+
+    @Published private(set) var phase:          PunishmentPhase = .phase1
+    @Published private(set) var elapsedSeconds: Int             = 0
+    @Published private(set) var isRunning:      Bool            = false
 
     private var timer: AnyCancellable?
 
     // MARK: - Control
 
-    func start() {
+    func start(alarmId: UUID) {
         guard !isRunning else { return }
         isRunning      = true
         elapsedSeconds = 0
         phase          = .phase1
 
-        // Persist flag — cleared in stop() — for force-quit detection
-        UserDefaults.standard.set(true, forKey: PunishmentEngine.kAlarmInProgress)
+        let ud = UserDefaults.standard
+        ud.set(true,              forKey: PunishmentEngine.kAlarmInProgress)
+        ud.set(alarmId.uuidString, forKey: PunishmentEngine.kAlarmIdKey)
+        ud.set(Date(),            forKey: PunishmentEngine.kAlarmStartTimeKey)
 
+        // Start audio AND haptics immediately at phase 1
         AudioManager.shared.startAlarm()
+        HapticsManager.shared.startPhase1()
 
         timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.tick() }
     }
 
-    /// Called when the app returns to the foreground (.active scenePhase).
-    /// Restarts any audio or haptic player that the OS silenced or paused.
+    /// Called when the app returns to the foreground (`.active` scenePhase).
+    /// Restarts audio and haptics if they were paused by the OS.
     func restoreIfNeeded() {
         guard isRunning else { return }
         AudioManager.shared.ensurePlaying()
-        // Re-arm haptics for the current phase
-        switch phase {
-        case .phase1: break          // haptics don't start until phase 2
-        case .phase2: HapticsManager.shared.ensureRunning(intense: false)
-        case .phase3: HapticsManager.shared.ensureRunning(intense: true)
-        }
+        HapticsManager.shared.ensureRunning()
     }
 
     func stop() {
         timer?.cancel()
-        timer   = nil
+        timer     = nil
         isRunning = false
 
-        // Clear the force-quit flag (alarm ended normally)
-        UserDefaults.standard.removeObject(forKey: PunishmentEngine.kAlarmInProgress)
+        let ud = UserDefaults.standard
+        ud.removeObject(forKey: PunishmentEngine.kAlarmInProgress)
+        ud.removeObject(forKey: PunishmentEngine.kAlarmIdKey)
+        ud.removeObject(forKey: PunishmentEngine.kAlarmStartTimeKey)
 
         AudioManager.shared.stopAlarm()
         HapticsManager.shared.stop()
@@ -78,13 +83,13 @@ final class PunishmentEngine: ObservableObject {
         case 30:
             phase = .phase2
             AudioManager.shared.rampToMax()
-            HapticsManager.shared.startContinuous()
+            HapticsManager.shared.startPhase2()
             LiveActivityManager.shared.update(elapsedSeconds: 30, escalationLevel: 2)
 
         case 60:
             phase = .phase3
             AudioManager.shared.startAggressiveLayer()
-            HapticsManager.shared.startIntense()
+            HapticsManager.shared.startPhase3()
             LiveActivityManager.shared.update(elapsedSeconds: 60, escalationLevel: 3)
 
         default: break

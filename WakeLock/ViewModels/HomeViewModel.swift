@@ -46,6 +46,11 @@ final class HomeViewModel: ObservableObject {
             showQRSetup = true
             return
         }
+        // Free tier: max 2 alarms
+        guard AlarmManager.shared.canAddAlarm else {
+            showPremiumSheet = true
+            return
+        }
         showCreateAlarm = true
     }
 

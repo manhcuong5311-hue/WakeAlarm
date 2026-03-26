@@ -53,10 +53,11 @@ struct HomeView: View {
             }
             .navigationBarHidden(true)
         }
-        .sheet(isPresented: $vm.showCreateAlarm) { CreateAlarmView() }
-        .sheet(isPresented: $vm.showQRSetup)     { QRSetupView() }
-        .sheet(item: $editingAlarm)              { CreateAlarmView(editing: $0) }
-        .sheet(isPresented: $showSettings)       { SettingsView() }
+        .sheet(isPresented: $vm.showCreateAlarm)  { CreateAlarmView() }
+        .sheet(isPresented: $vm.showQRSetup)      { QRSetupView() }
+        .sheet(item: $editingAlarm)               { CreateAlarmView(editing: $0) }
+        .sheet(isPresented: $showSettings)        { SettingsView() }
+        .sheet(isPresented: $vm.showPremiumSheet) { PremiumPaywallView() }
         .onAppear {
             vm.checkNotificationPermission()
             if vm.notificationStatus == .notDetermined {
@@ -169,8 +170,12 @@ struct HomeView: View {
 
     private var alarmsSection: some View {
         VStack(spacing: 0) {
-            SectionHeaderView(title: "Alarms", trailing: "Edit") {}
-                .padding(.bottom, 10)
+            SectionHeaderView(
+                title: "Alarms",
+                trailing: !PremiumManager.shared.isPremium ? "Free: \(vm.alarms.count)/2" : nil,
+                trailingAction: nil
+            )
+            .padding(.bottom, 10)
 
             VStack(spacing: DS.Layout.itemSpacing) {
                 ForEach(vm.alarms) { alarm in

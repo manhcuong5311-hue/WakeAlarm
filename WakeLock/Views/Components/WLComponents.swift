@@ -324,10 +324,16 @@ struct SectionHeaderView: View {
                 .textCase(.uppercase)
                 .tracking(0.8)
             Spacer()
-            if let t = trailing, let action = trailingAction {
-                Button(t, action: action)
-                    .font(DS.Font.caption)
-                    .foregroundStyle(DS.Color.accent)
+            if let t = trailing {
+                if let action = trailingAction {
+                    Button(t, action: action)
+                        .font(DS.Font.caption)
+                        .foregroundStyle(DS.Color.accent)
+                } else {
+                    Text(t)
+                        .font(DS.Font.caption)
+                        .foregroundStyle(DS.Color.label3)
+                }
             }
         }
         .padding(.horizontal, DS.Layout.screenPadding)

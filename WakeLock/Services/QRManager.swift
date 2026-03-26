@@ -46,6 +46,22 @@ final class QRManager: ObservableObject {
         saveMetadata()
     }
 
+    /// Rename a QR entry's label without changing its scanned value.
+    func updateLabel(_ entry: QRCodeEntry, label: String) {
+        guard let idx = entries.firstIndex(of: entry) else { return }
+        entries[idx].label = label
+        saveMetadata()
+    }
+
+    /// Replace the raw QR value of an existing entry (user re-scanned).
+    func rescan(_ entry: QRCodeEntry, newValue: String) {
+        guard let idx = entries.firstIndex(of: entry) else { return }
+        KeychainService.shared.delete(forKey: keychainKey(for: entry.id))
+        KeychainService.shared.save(newValue, forKey: keychainKey(for: entry.id))
+        entries[idx].value = newValue
+        saveMetadata()
+    }
+
     func setPrimary(_ entry: QRCodeEntry) {
         for i in entries.indices { entries[i].isPrimary = false }
         if let idx = entries.firstIndex(of: entry) { entries[idx].isPrimary = true }

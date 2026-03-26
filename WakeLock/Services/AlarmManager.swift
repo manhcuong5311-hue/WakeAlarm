@@ -17,6 +17,11 @@ final class AlarmManager: ObservableObject {
 
     @Published private(set) var alarms: [Alarm] = []
 
+    /// Free tier: max 2 alarms. Premium users have no limit.
+    var canAddAlarm: Bool {
+        PremiumManager.shared.isPremium || alarms.count < 2
+    }
+
     // MARK: - CRUD
 
     func add(_ alarm: Alarm) {
