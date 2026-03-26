@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WakeLock — Legal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0a0f;
+    --surface:  #111118;
+    --surface2: #18181f;
+    --border:   rgba(255,255,255,0.07);
+    --accent:   #6c63ff;
+    --accent2:  #a78bfa;
+    --success:  #34d399;
+    --gold:     #fbbf24;
+    --danger:   #f87171;
+    --text1:    #f0f0f8;
+    --text2:    #9898b0;
+    --text3:    #55556a;
+    --glow:     rgba(108,99,255,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text1);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Radial glow bg ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 600px;
+    background: radial-gradient(ellipse at center, rgba(108,99,255,0.13) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Layout ── */
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 52px 0 40px;
+    text-align: center;
+  }
+
+  .logo-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 32px rgba(108,99,255,0.45), 0 4px 16px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .logo-mark svg { width: 28px; height: 28px; fill: white; }
+  .logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+    pointer-events: none;
+  }
+
+  h1.site-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(120deg, var(--text1) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .site-sub {
+    color: var(--text2);
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ── Tab nav ── */
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 40px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    background: transparent;
+    color: var(--text2);
+    letter-spacing: 0.01em;
+  }
+
+  .tab-btn:hover { color: var(--text1); }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(108,99,255,0.35);
+  }
+
+  /* ── Tab panels ── */
+  .tab-panel { display: none; }
+  .tab-panel.active {
+    display: block;
+    animation: fadeUp 0.32s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Page meta ── */
+  .page-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .meta-badge.privacy  { background: rgba(108,99,255,0.15); color: var(--accent2); border: 1px solid rgba(108,99,255,0.25); }
+  .meta-badge.terms    { background: rgba(251,191,36,0.12); color: var(--gold); border: 1px solid rgba(251,191,36,0.22); }
+  .meta-badge svg { width: 12px; height: 12px; fill: currentColor; }
+
+  .meta-date {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* ── Section cards ── */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.22s;
+  }
+
+  .section-card:hover { border-color: rgba(108,99,255,0.2); }
+
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+  }
+  .section-card.purple::before  { background: linear-gradient(180deg, var(--accent), var(--accent2)); }
+  .section-card.green::before   { background: linear-gradient(180deg, var(--success), #059669); }
+  .section-card.gold::before    { background: linear-gradient(180deg, var(--gold), #d97706); }
+  .section-card.red::before     { background: linear-gradient(180deg, var(--danger), #dc2626); }
+  .section-card.blue::before    { background: linear-gradient(180deg, #60a5fa, #3b82f6); }
+  .section-card.teal::before    { background: linear-gradient(180deg, #2dd4bf, #0d9488); }
+
+  .section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .section-icon svg { width: 17px; height: 17px; fill: currentColor; }
+  .section-icon.purple { background: rgba(108,99,255,0.15); color: var(--accent2); }
+  .section-icon.green  { background: rgba(52,211,153,0.13);  color: var(--success); }
+  .section-icon.gold   { background: rgba(251,191,36,0.12);  color: var(--gold); }
+  .section-icon.red    { background: rgba(248,113,113,0.13); color: var(--danger); }
+  .section-icon.blue   { background: rgba(96,165,250,0.12);  color: #60a5fa; }
+  .section-icon.teal   { background: rgba(45,212,191,0.12);  color: #2dd4bf; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text1);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .section-body {
+    color: var(--text2);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .section-body ul {
+    list-style: none;
+    margin-top: 10px;
+  }
+
+  .section-body ul li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 7px;
+  }
+
+  .section-body ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  /* ── Highlight boxes ── */
+  .highlight-box {
+    background: rgba(108,99,255,0.07);
+    border: 1px solid rgba(108,99,255,0.18);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--accent2);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .highlight-box svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; margin-top: 2px; }
+
+  .highlight-box.green {
+    background: rgba(52,211,153,0.07);
+    border-color: rgba(52,211,153,0.18);
+    color: var(--success);
+  }
+
+  /* ── Permission pills ── */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .pill svg { width: 13px; height: 13px; fill: currentColor; }
+  .pill.camera { color: #60a5fa; }
+  .pill.bell   { color: var(--success); }
+  .pill.face   { color: var(--accent2); }
+
+  /* ── Contact CTA ── */
+  .contact-card {
+    background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(167,139,250,0.06));
+    border: 1px solid rgba(108,99,255,0.22);
+    border-radius: 18px;
+    padding: 30px 32px;
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  .contact-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .contact-card p {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .contact-card a.email-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .contact-card a.email-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(108,99,255,0.45);
+  }
+  .contact-card a.email-btn svg { width: 15px; height: 15px; fill: white; }
+
+  /* ── Numbering for Terms ── */
+  .numbered-section { counter-reset: clause; }
+  .clause {
+    counter-increment: clause;
+    position: relative;
+    padding-left: 42px;
+  }
+  .clause::before {
+    content: counter(clause, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text3);
+    padding-top: 4px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .footer-logo-dot {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .footer-logo-dot svg { width: 14px; height: 14px; fill: white; }
+  .footer-logo span { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+
+  footer p { color: var(--text3); font-size: 13px; }
+
+  /* ── Scroll indicator bar ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 100;
+    transition: width 0.05s linear;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .section-card { padding: 22px 20px; }
+    .contact-card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="wrapper">
+  <header>
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+    </div>
+    <h1 class="site-title">WakeLock</h1>
+    <p class="site-sub">Legal &amp; Privacy</p>
+  </header>
+
+  <!-- Tab bar -->
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" role="tab" onclick="switchTab('privacy', this)">Privacy Policy</button>
+    <button class="tab-btn"        role="tab" onclick="switchTab('terms',   this)">Terms of Use</button>
+  </div>
+
+  <!-- ═══════════════════════════════════ PRIVACY POLICY ═══════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-privacy">
+
+    <div class="page-meta">
+      <span class="meta-badge privacy">
+        <svg viewBox="0 0 24 24"><path d="M12 2L3 7l1.63 10.27L12 22l7.37-4.73L21 7zm0 2.4l6 3.45-1.38 8.7L12 19.6l-4.62-2.97L6 7.85z"/></svg>
+        Privacy Policy
+      </span>
+      <span class="meta-date">Last updated: March 2025</span>
+    </div>
+
+    <!-- Overview -->
+    <div class="section-card purple">
+      <div class="section-icon purple">
+        <svg viewBox="0 0 24 24"><path d="M12 2L3 7l1.63 10.27L12 22l7.37-4.73L21 7zm0 2.4l6 3.45-1.38 8.7L12 19.6l-4.62-2.97L6 7.85z"/></svg>
+      </div>
+      <h2 class="section-title">Overview</h2>
+      <p class="section-body">WakeLock is built with your privacy as a priority. We do not collect, transmit, or share any personal data. Everything stays on your device — no servers, no cloud sync, no tracking.</p>
+      <div class="highlight-box green">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"/></svg>
+        100% on-device. Zero personal data ever leaves your phone.
+      </div>
+    </div>
+
+    <!-- Data We Store -->
+    <div class="section-card green">
+      <div class="section-icon green">
+        <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.36 0-2.56-2.24-4.64-5-4.64-1.96 0-3.64 1.04-4.5 2.56C8.14 1.56 6.84 1 5.5 1 3.02 1 1 2.92 1 5.28c0 .48.11.92.18 1.36H0v14h6v-2h12v2h6V6h-4zm-1 11H5V8h14v9z"/></svg>
+      </div>
+      <h2 class="section-title">Data We Store</h2>
+      <div class="section-body">
+        <p>All data is stored locally on your device only.</p>
+        <ul>
+          <li>Alarm settings (time, label, repeat days) — stored in UserDefaults</li>
+          <li>QR code values — stored securely in iOS Keychain</li>
+          <li>Wake-up streak data — stored in UserDefaults</li>
+          <li>Premium purchase status — verified via StoreKit 2 and stored locally</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Data We Do NOT Collect -->
+    <div class="section-card red">
+      <div class="section-icon red">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+      </div>
+      <h2 class="section-title">Data We Do NOT Collect</h2>
+      <div class="section-body">
+        <ul>
+          <li>No analytics or usage tracking</li>
+          <li>No crash reporting sent to external servers</li>
+          <li>No advertising identifiers</li>
+          <li>No location data</li>
+          <li>No microphone or camera data stored or transmitted</li>
+          <li>No account creation, login, or user profiles</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Permissions -->
+    <div class="section-card blue">
+      <div class="section-icon blue">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
+      <h2 class="section-title">Permissions</h2>
+      <div class="section-body">
+        <div class="pill-group">
+          <span class="pill camera">
+            <svg viewBox="0 0 24 24"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2m0-8a4.8 4.8 0 0 0-4.8 4.8A4.8 4.8 0 0 0 12 16.8 4.8 4.8 0 0 0 16.8 12 4.8 4.8 0 0 0 12 7.2M2 4h3.5L7 2h10l1.5 2H22a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+            Camera
+          </span>
+          <span class="pill bell">
+            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            Notifications
+          </span>
+          <span class="pill face">
+            <svg viewBox="0 0 24 24"><path d="M9 11.75A1.25 1.25 0 0 0 7.75 13 1.25 1.25 0 0 0 9 14.25 1.25 1.25 0 0 0 10.25 13 1.25 1.25 0 0 0 9 11.75m6 0A1.25 1.25 0 0 0 13.75 13 1.25 1.25 0 0 0 15 14.25 1.25 1.25 0 0 0 16.25 13 1.25 1.25 0 0 0 15 11.75M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8 8 8 0 0 1 8-8 8 8 0 0 1 8 8 8 8 0 0 1-8 8m0-4c-2.33 0-4.32-1.45-5.12-3.5h1.67c.69 1.19 1.97 2 3.45 2s2.75-.81 3.45-2h1.67C16.32 16.55 14.33 18 12 18z"/></svg>
+            Face ID / Touch ID
+          </span>
+        </div>
+        <ul style="margin-top:14px">
+          <li>Camera — used only to scan QR codes locally. No images are stored or transmitted.</li>
+          <li>Notifications — all local and on-device. No push server involved.</li>
+          <li>Face ID / Touch ID — optional alarm dismissal only. Biometric data never leaves your device.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Third Party -->
+    <div class="section-card gold">
+      <div class="section-icon gold">
+        <svg viewBox="0 0 24 24"><path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/></svg>
+      </div>
+      <h2 class="section-title">Third-Party Services</h2>
+      <p class="section-body">WakeLock uses Apple's StoreKit 2 for in-app purchases. Apple handles all payment processing and purchase verification. We receive no payment details. See <a href="https://www.apple.com/privacy/" style="color:var(--accent2);text-decoration:none;" target="_blank">Apple's Privacy Policy</a>.</p>
+    </div>
+
+    <!-- Data Deletion -->
+    <div class="section-card teal">
+      <div class="section-icon teal">
+        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      </div>
+      <h2 class="section-title">Data Deletion</h2>
+      <p class="section-body">Uninstalling WakeLock removes all app data from your device. Keychain entries are also cleared on uninstall per iOS default behaviour for apps without shared Keychain groups.</p>
+    </div>
+
+    <!-- Contact -->
+    <div class="contact-card">
+      <h3>Privacy Questions?</h3>
+      <p>We're happy to answer any questions about how WakeLock handles your data.</p>
+      <a class="email-btn" href="mailto:Manhcuong531@gmail.com">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        Manhcuong531@gmail.com
+      </a>
+    </div>
+
+  </div><!-- /panel-privacy -->
+
+
+  <!-- ═══════════════════════════════════ TERMS OF USE ═══════════════════════════════════ -->
+  <div class="tab-panel" id="panel-terms">
+
+    <div class="page-meta">
+      <span class="meta-badge terms">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+        Terms of Use
+      </span>
+      <span class="meta-date">Last updated: March 2025</span>
+    </div>
+
+    <div class="section-card purple numbered-section">
+      <div class="section-icon purple">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-.5-13H13v6l5 3-1 1.73-5.5-3.23V7z"/></svg>
+      </div>
+      <h2 class="section-title">Acceptance of Terms</h2>
+      <p class="section-body">By downloading, installing, or using WakeLock ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree with any part of these Terms, do not use the App.</p>
+    </div>
+
+    <div class="section-card green">
+      <div class="section-icon green">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      </div>
+      <h2 class="section-title">License &amp; Permitted Use</h2>
+      <div class="section-body">
+        <p>We grant you a limited, non-exclusive, non-transferable, revocable licence to use the App on Apple-branded devices you own or control, solely for personal, non-commercial purposes in accordance with these Terms.</p>
+        <p style="margin-top:10px">You may not:</p>
+        <ul>
+          <li>Copy, modify, or distribute the App or any part of it</li>
+          <li>Reverse-engineer, decompile, or disassemble the App</li>
+          <li>Use the App for any unlawful or harmful purpose</li>
+          <li>Remove any copyright or proprietary notices</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-card gold">
+      <div class="section-icon gold">
+        <svg viewBox="0 0 24 24"><path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2z"/></svg>
+      </div>
+      <h2 class="section-title">In-App Purchases</h2>
+      <div class="section-body">
+        <p>WakeLock offers a one-time purchase ("Premium") that unlocks additional features. All purchases are processed by Apple through the App Store under Apple's standard terms. Prices are displayed in your local currency at the time of purchase.</p>
+        <ul style="margin-top:10px">
+          <li>Purchases are final — refunds are subject to Apple's refund policy</li>
+          <li>Premium is tied to your Apple ID and can be restored on any device signed in with the same Apple ID</li>
+          <li>We reserve the right to modify, discontinue, or add features at any time</li>
+        </ul>
+        <div class="highlight-box">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Apple's EULA applies: <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" style="color:inherit;text-decoration:underline;text-underline-offset:3px;" target="_blank">View Apple's Standard EULA</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card blue">
+      <div class="section-icon blue">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      </div>
+      <h2 class="section-title">Disclaimer &amp; Limitation of Liability</h2>
+      <div class="section-body">
+        <p>The App is provided "as is" without warranties of any kind, express or implied. We do not guarantee that the App will be uninterrupted, error-free, or that alarms will fire under all device conditions (e.g., low battery, Do Not Disturb, or force-quit).</p>
+        <p style="margin-top:10px">To the fullest extent permitted by law, WakeLock and its developers shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App — including but not limited to missed appointments or events.</p>
+      </div>
+    </div>
+
+    <div class="section-card teal">
+      <div class="section-icon teal">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      </div>
+      <h2 class="section-title">User Responsibilities</h2>
+      <div class="section-body">
+        <ul>
+          <li>You are responsible for ensuring QR codes are placed safely and accessibly</li>
+          <li>You agree not to misuse alarm features in any way that could cause harm to yourself or others</li>
+          <li>You are responsible for maintaining a compatible iOS device and OS version</li>
+          <li>Enabling system-level permissions (notifications, camera) is your responsibility</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-card red">
+      <div class="section-icon red">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <h2 class="section-title">Changes to These Terms</h2>
+      <p class="section-body">We may update these Terms from time to time. If we make material changes, we will update the "last updated" date at the top of this page. Continued use of the App after changes constitutes your acceptance of the revised Terms.</p>
+    </div>
+
+    <div class="section-card purple">
+      <div class="section-icon purple">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+      <h2 class="section-title">Governing Law</h2>
+      <p class="section-body">These Terms are governed by and construed in accordance with applicable law. Any disputes shall be subject to the exclusive jurisdiction of the competent courts in the relevant territory.</p>
+    </div>
+
+    <!-- Contact -->
+    <div class="contact-card">
+      <h3>Questions about our Terms?</h3>
+      <p>Reach out and we'll get back to you as soon as possible.</p>
+      <a class="email-btn" href="mailto:Manhcuong531@gmail.com">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        Manhcuong531@gmail.com
+      </a>
+    </div>
+
+  </div><!-- /panel-terms -->
+
+  <footer>
+    <div class="footer-logo">
+      <div class="footer-logo-dot">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 15H11v-6h1.5v6zm0-8H11V7h1.5v2z"/></svg>
+      </div>
+      <span>WakeLock</span>
+    </div>
+    <p>&copy; 2025 WakeLock. All rights reserved.</p>
+  </footer>
+</div>
+
+<script>
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Scroll progress
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const pct = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Staggered card entrance
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }, i * 60);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.section-card, .contact-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(18px)';
+    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.22s';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
