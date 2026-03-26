@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  com.apple.developer.usernotifications.critical-alerts is intentionally
+	  omitted here. It requires explicit Apple approval before it can be
+	  added to a provisioning profile.
+
+	  To request it:
+	    1. Sign in at developer.apple.com → Certificates, IDs & Profiles
+	    2. Select your App ID → Edit → enable "Critical Alerts"
+	       (Apple will ask you to submit a short justification form)
+	    3. After approval, regenerate your provisioning profile
+	    4. Uncomment the key below and rebuild
+
+	  Justification text to use:
+	  "WakeLock is a wake-up alarm app that requires audible alerts even when
+	   the device is set to silent or Do Not Disturb. Missing an alarm can cause
+	   users to be late for work, medical appointments, or other time-critical
+	   responsibilities. Critical alert capability is essential for the app's
+	   core purpose."
+
+	  <key>com.apple.developer.usernotifications.critical-alerts</key>
+	  <true/>
+	-->
+</dict>
+</plist>

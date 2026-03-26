@@ -6,20 +6,84 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BB100012BB100012BB100012 /* WakeLockWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BB100001BB100001BB100001 /* WakeLockWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BB100014BB100014BB100014 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0D43BF1B2F74D3ED005B91BF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB100005BB100005BB100005;
+			remoteInfo = WakeLockWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BB100011BB100011BB100011 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				BB100012BB100012BB100012 /* WakeLockWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0D43BF232F74D3ED005B91BF /* WakeLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WakeLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB100001BB100001BB100001 /* WakeLockWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WakeLockWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AB43BF252F74D3ED005B91BD /* Exceptions for "WakeLock" folder in "WakeLock" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0D43BF222F74D3ED005B91BF /* WakeLock */;
+		};
+		BB100010BB100010BB100010 /* Exceptions for "WakeLockWidget" folder in "WakeLockWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BB100005BB100005BB100005 /* WakeLockWidget */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0D43BF252F74D3ED005B91BF /* WakeLock */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AB43BF252F74D3ED005B91BD /* Exceptions for "WakeLock" folder in "WakeLock" target */,
+			);
 			path = WakeLock;
+			sourceTree = "<group>";
+		};
+		BB100006BB100006BB100006 /* WakeLockWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BB100010BB100010BB100010 /* Exceptions for "WakeLockWidget" folder in "WakeLockWidget" target */,
+			);
+			path = WakeLockWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		0D43BF202F74D3ED005B91BF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB100003BB100003BB100003 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				0D43BF252F74D3ED005B91BF /* WakeLock */,
+				BB100006BB100006BB100006 /* WakeLockWidget */,
 				0D43BF242F74D3ED005B91BF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				0D43BF232F74D3ED005B91BF /* WakeLock.app */,
+				BB100001BB100001BB100001 /* WakeLockWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,10 +121,12 @@
 				0D43BF1F2F74D3ED005B91BF /* Sources */,
 				0D43BF202F74D3ED005B91BF /* Frameworks */,
 				0D43BF212F74D3ED005B91BF /* Resources */,
+				BB100011BB100011BB100011 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				BB100013BB100013BB100013 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				0D43BF252F74D3ED005B91BF /* WakeLock */,
@@ -69,6 +137,28 @@
 			productName = WakeLock;
 			productReference = 0D43BF232F74D3ED005B91BF /* WakeLock.app */;
 			productType = "com.apple.product-type.application";
+		};
+		BB100005BB100005BB100005 /* WakeLockWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB100009BB100009BB100009 /* Build configuration list for PBXNativeTarget "WakeLockWidget" */;
+			buildPhases = (
+				BB100002BB100002BB100002 /* Sources */,
+				BB100003BB100003BB100003 /* Frameworks */,
+				BB100004BB100004BB100004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BB100006BB100006BB100006 /* WakeLockWidget */,
+			);
+			name = WakeLockWidget;
+			packageProductDependencies = (
+			);
+			productName = WakeLockWidget;
+			productReference = BB100001BB100001BB100001 /* WakeLockWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +171,9 @@
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					0D43BF222F74D3ED005B91BF = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+					BB100005BB100005BB100005 = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
 				};
@@ -100,12 +193,20 @@
 			projectRoot = "";
 			targets = (
 				0D43BF222F74D3ED005B91BF /* WakeLock */,
+				BB100005BB100005BB100005 /* WakeLockWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		0D43BF212F74D3ED005B91BF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB100004BB100004BB100004 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +223,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BB100002BB100002BB100002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BB100013BB100013BB100013 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB100005BB100005BB100005 /* WakeLockWidget */;
+			targetProxy = BB100014BB100014BB100014 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0D43BF2C2F74D3ED005B91BF /* Debug */ = {
@@ -251,16 +367,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WakeLock/WakeLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 553U32259K;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WakeLock/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -283,16 +397,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WakeLock/WakeLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 553U32259K;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WakeLock/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -300,6 +412,62 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.SamCorp.WakeLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BB100007BB100007BB100007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 553U32259K;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WakeLockWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.SamCorp.WakeLock.WakeLockWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BB100008BB100008BB100008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 553U32259K;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WakeLockWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.SamCorp.WakeLock.WakeLockWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -327,6 +495,15 @@
 			buildConfigurations = (
 				0D43BF2F2F74D3ED005B91BF /* Debug */,
 				0D43BF302F74D3ED005B91BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB100009BB100009BB100009 /* Build configuration list for PBXNativeTarget "WakeLockWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB100007BB100007BB100007 /* Debug */,
+				BB100008BB100008BB100008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
