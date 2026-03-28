@@ -27,9 +27,9 @@ final class QRManager: ObservableObject {
 
     // MARK: - CRUD
 
-    func add(label: String, value: String) {
+    func add(label: String, value: String, codeType: String = "org.iso.QRCode") {
         guard canAddMore else { return }
-        var entry = QRCodeEntry(label: label, value: value, isPrimary: entries.isEmpty)
+        let entry = QRCodeEntry(label: label, value: value, codeType: codeType, isPrimary: entries.isEmpty)
         // Persist the raw QR value securely in Keychain
         KeychainService.shared.save(value, forKey: keychainKey(for: entry.id))
         entries.append(entry)
@@ -54,11 +54,12 @@ final class QRManager: ObservableObject {
     }
 
     /// Replace the raw QR value of an existing entry (user re-scanned).
-    func rescan(_ entry: QRCodeEntry, newValue: String) {
+    func rescan(_ entry: QRCodeEntry, newValue: String, newType: String? = nil) {
         guard let idx = entries.firstIndex(of: entry) else { return }
         KeychainService.shared.delete(forKey: keychainKey(for: entry.id))
         KeychainService.shared.save(newValue, forKey: keychainKey(for: entry.id))
         entries[idx].value = newValue
+        if let t = newType { entries[idx].codeType = t }
         saveMetadata()
     }
 
@@ -90,6 +91,7 @@ final class QRManager: ObservableObject {
         let metadata = entries.map { e -> [String: String] in
             ["id": e.id.uuidString,
              "label": e.label,
+             "codeType": e.codeType,
              "isPrimary": e.isPrimary ? "1" : "0",
              "createdAt": ISO8601DateFormatter().string(from: e.createdAt)]
         }
@@ -105,9 +107,10 @@ final class QRManager: ObservableObject {
                   let label = dict["label"] else { return nil }
             // Re-fetch raw value from keychain
             guard let value = KeychainService.shared.load(forKey: "qr.\(idStr)") else { return nil }
+            let codeType = dict["codeType"] ?? "org.iso.QRCode"   // backward-compat default
             let isPrimary = dict["isPrimary"] == "1"
             let createdAt = dict["createdAt"].flatMap { ISO8601DateFormatter().date(from: $0) } ?? Date()
-            var entry = QRCodeEntry(label: label, value: value, isPrimary: isPrimary)
+            var entry = QRCodeEntry(label: label, value: value, codeType: codeType, isPrimary: isPrimary)
             entry.id = id
             entry.createdAt = createdAt
             return entry

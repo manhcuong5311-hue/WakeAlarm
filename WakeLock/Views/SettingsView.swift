@@ -140,18 +140,18 @@ struct SettingsView: View {
     private func qrEntryRow(_ entry: QRCodeEntry) -> some View {
         HStack(spacing: 12) {
 
-            // QR icon
+            // QR icon (changes based on code type)
             ZStack {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(DS.Color.success.opacity(0.15))
                     .frame(width: 36, height: 36)
-                Image(systemName: "qrcode")
+                Image(systemName: entry.typeIcon)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(DS.Color.success)
             }
 
-            // Label + primary badge + value preview
-            VStack(alignment: .leading, spacing: 2) {
+            // Label + primary badge + type badge + date + value preview
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(entry.label)
                         .font(DS.Font.bodyBold)
@@ -165,6 +165,21 @@ struct SettingsView: View {
                             .background(DS.Color.success.opacity(0.12))
                             .clipShape(Capsule())
                     }
+                }
+                // Type + date row
+                HStack(spacing: 6) {
+                    Text(entry.typeDisplayName)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(DS.Color.accent)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(DS.Color.accent.opacity(0.10))
+                        .clipShape(Capsule())
+                    Text("·")
+                        .font(.system(size: 10))
+                        .foregroundStyle(DS.Color.label3)
+                    Text("Added \(entry.createdAt, style: .date)")
+                        .font(.system(size: 10))
+                        .foregroundStyle(DS.Color.label3)
                 }
                 Text(String(entry.value.prefix(26)) + (entry.value.count > 26 ? "…" : ""))
                     .font(.system(size: 11, design: .monospaced))
@@ -543,7 +558,7 @@ struct SettingsView: View {
                 Divider().padding(.leading, 60).opacity(0.4)
                 linkRow(icon: "envelope.fill",      iconColor: DS.Color.accent,
                         title: "Contact Support") {
-                    if let url = URL(string: "mailto:support@wakelock.app") {
+                    if let url = URL(string: "mailto:Manhcuong531@gmail.com") {
                         UIApplication.shared.open(url)
                     }
                 }
@@ -852,6 +867,7 @@ struct AddQRSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var label         = "Bathroom"
     @State private var pendingValue: String? = nil
+    @State private var pendingType: String   = "org.iso.QRCode"
     @State private var showScanner   = false
 
     private let presets = ["Bathroom", "Kitchen", "Front Door", "Desk", "Bedroom"]
@@ -913,7 +929,7 @@ struct AddQRSheet: View {
                         Spacer()
                         PrimaryButton("Save QR Code", icon: "checkmark") {
                             if let v = pendingValue {
-                                QRManager.shared.add(label: label, value: v)
+                                QRManager.shared.add(label: label, value: v, codeType: pendingType)
                             }
                             dismiss()
                         }
@@ -931,8 +947,9 @@ struct AddQRSheet: View {
                 }
             }
             .sheet(isPresented: $showScanner) {
-                QRScannerSheet { value in
+                QRScannerSheet { value, type in
                     pendingValue = value
+                    pendingType  = type
                     showScanner  = false
                 }
             }
@@ -1022,8 +1039,8 @@ struct EditQRSheet: View {
                 }
             }
             .sheet(isPresented: $showRescan) {
-                QRScannerSheet { value in
-                    QRManager.shared.rescan(entry, newValue: value)
+                QRScannerSheet { value, type in
+                    QRManager.shared.rescan(entry, newValue: value, newType: type)
                     rescanned   = true
                     showRescan  = false
                 }
@@ -1036,7 +1053,8 @@ struct EditQRSheet: View {
 // MARK: - QR Scanner Sheet (shared helper)
 
 struct QRScannerSheet: View {
-    let onScan: (String) -> Void
+    /// Called with (rawValue, codeTypeRawValue)
+    let onScan: (String, String) -> Void
 
     var body: some View {
         ZStack {

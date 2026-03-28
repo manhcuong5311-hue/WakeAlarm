@@ -8,6 +8,7 @@ struct QRSetupView: View {
     @State private var step: SetupStep = .intro
     @State private var labelText: String = "Bathroom"
     @State private var scannedValue: String? = nil
+    @State private var scannedType: String = "org.iso.QRCode"
     @State private var iconBounce = false
 
     enum SetupStep: Int { case intro, label, scan, done }
@@ -187,8 +188,8 @@ struct QRSetupView: View {
     private var scanView: some View {
         ZStack {
             // Full camera preview
-            QRScannerView { value in
-                withAnimation { scannedValue = value; step = .done }
+            QRScannerView { value, type in
+                withAnimation { scannedValue = value; scannedType = type; step = .done }
             }
             .ignoresSafeArea()
 
@@ -262,7 +263,9 @@ struct QRSetupView: View {
 
             VStack(spacing: 12) {
                 PrimaryButton("Start Creating Alarms", icon: "alarm.fill") {
-                    if let v = scannedValue { QRManager.shared.add(label: labelText, value: v) }
+                    if let v = scannedValue {
+                        QRManager.shared.add(label: labelText, value: v, codeType: scannedType)
+                    }
                     dismiss()
                 }
 

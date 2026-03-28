@@ -134,6 +134,16 @@ final class NotificationService {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
+    /// Remove the primary alarm notification from the delivered notification
+    /// centre (the one that originally triggered the ring screen).
+    /// Call this on every dismissal path so `handleAppDidBecomeActive` cannot
+    /// find it and re-trigger the ring screen after the Face-ID prompt closes.
+    func clearDeliveredAlarm(alarmId: String) {
+        var ids = [alarmId]
+        for day in 1...7 { ids.append("\(alarmId)-\(day)") }
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
+    }
+
     // MARK: - Burst chain  (process NOT running)
 
     /// Schedule `burstCount` follow-up notifications every `burstInterval` seconds.

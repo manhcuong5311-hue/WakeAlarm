@@ -3,9 +3,11 @@ import SwiftUI
 struct HomeView: View {
 
     @StateObject private var vm = HomeViewModel()
-    @State private var editingAlarm: Alarm? = nil
-    @State private var showSettings = false
-    @State private var headerAppear = false
+    @ObservedObject private var qrManager = QRManager.shared
+    @State private var editingAlarm: Alarm?  = nil
+    @State private var showSettings          = false
+    @State private var showQRPicker          = false   // quick primary-picker sheet
+    @State private var headerAppear          = false
 
     var body: some View {
         NavigationStack {
@@ -30,9 +32,12 @@ struct HomeView: View {
                         StreakBannerView()
                             .padding(.horizontal, DS.Layout.screenPadding)
 
-                        // QR setup nudge
-                        if !QRManager.shared.hasQR {
+                        // QR status / setup nudge
+                        if !qrManager.hasQR {
                             qrNudgeBanner
+                                .padding(.horizontal, DS.Layout.screenPadding)
+                        } else {
+                            qrStatusCard
                                 .padding(.horizontal, DS.Layout.screenPadding)
                         }
 
@@ -58,6 +63,7 @@ struct HomeView: View {
         .sheet(item: $editingAlarm)               { CreateAlarmView(editing: $0) }
         .sheet(isPresented: $showSettings)        { SettingsView() }
         .sheet(isPresented: $vm.showPremiumSheet) { PremiumPaywallView() }
+        .sheet(isPresented: $showQRPicker)        { QRPrimaryPickerSheet() }
         .onAppear {
             vm.checkNotificationPermission()
             if vm.notificationStatus == .notDetermined {
@@ -134,6 +140,94 @@ struct HomeView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(DS.Color.danger.opacity(0.2), lineWidth: 1)
         )
+    }
+
+    private var qrStatusCard: some View {
+        let primary = qrManager.entries.first(where: { $0.isPrimary })
+        let count   = qrManager.entries.count
+
+        return VStack(spacing: 0) {
+            // ── Primary code row ──────────────────────────────────────────────
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(DS.Color.success.opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: primary?.typeIcon ?? "qrcode")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(DS.Color.success)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Text(primary?.label ?? "No Primary")
+                            .font(DS.Font.bodyBold)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+
+                        // Type badge  (e.g. "QR Code")
+                        if let primary {
+                            Text(primary.typeDisplayName)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(DS.Color.success)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(DS.Color.success.opacity(0.10))
+                                .clipShape(Capsule())
+                        }
+                    }
+
+                    // Shape hint + secondary count
+                    HStack(spacing: 4) {
+                        if let primary {
+                            // Shape badge  (Square / Linear / Circular …)
+                            Text(primary.shapeHint)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(DS.Color.label3)
+                        }
+                        if count > 1 {
+                            Text("·")
+                                .font(.system(size: 10))
+                                .foregroundStyle(DS.Color.label3)
+                            Text("\(count) codes saved")
+                                .font(.system(size: 10))
+                                .foregroundStyle(DS.Color.label3)
+                        }
+                    }
+                }
+
+                Spacer(minLength: 4)
+
+                // ── Action buttons ────────────────────────────────────────────
+                HStack(spacing: 8) {
+                    // Quick primary-picker — only useful when there is more than 1 QR
+                    if count > 1 {
+                        Button {
+                            showQRPicker = true
+                        } label: {
+                            Text("Change")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(DS.Color.accent)
+                                .padding(.horizontal, 10).padding(.vertical, 5)
+                                .background(DS.Color.accent.opacity(0.10))
+                                .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    Button { showSettings = true } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(DS.Color.label3)
+                            .frame(width: 28, height: 28)
+                            .background(Color.appSurface.opacity(0.7))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(DS.Layout.cardPadding)
+        }
+        .cardStyle()
     }
 
     private var qrNudgeBanner: some View {
@@ -228,6 +322,130 @@ struct HomeView: View {
         let f = DateFormatter()
         f.dateFormat = "EEEE, MMMM d"
         return f.string(from: Date())
+    }
+}
+
+// MARK: - QR Primary Picker Sheet
+
+/// A compact sheet that lists every saved QR/barcode and lets the user
+/// tap one to make it the primary code used for alarm dismissal.
+struct QRPrimaryPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var qrManager = QRManager.shared
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+
+                if qrManager.entries.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "qrcode")
+                            .font(.system(size: 40))
+                            .foregroundStyle(DS.Color.label3)
+                        Text("No QR codes saved yet")
+                            .font(DS.Font.body)
+                            .foregroundStyle(DS.Color.label2)
+                    }
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            ForEach(Array(qrManager.entries.enumerated()), id: \.element.id) { idx, entry in
+                                VStack(spacing: 0) {
+                                    Button {
+                                        withAnimation(DS.Animation.smooth) {
+                                            qrManager.setPrimary(entry)
+                                        }
+                                        dismiss()
+                                    } label: {
+                                        HStack(spacing: 14) {
+                                            // Icon
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                    .fill(entry.isPrimary
+                                                          ? DS.Color.success.opacity(0.15)
+                                                          : Color.appSurface)
+                                                    .frame(width: 44, height: 44)
+                                                Image(systemName: entry.typeIcon)
+                                                    .font(.system(size: 18, weight: .medium))
+                                                    .foregroundStyle(entry.isPrimary
+                                                                     ? DS.Color.success
+                                                                     : DS.Color.label2)
+                                            }
+
+                                            // Info
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text(entry.label)
+                                                    .font(DS.Font.bodyBold)
+                                                    .foregroundStyle(.primary)
+                                                    .lineLimit(1)
+
+                                                HStack(spacing: 5) {
+                                                    // Shape hint
+                                                    Text(entry.shapeHint)
+                                                        .font(.system(size: 11, weight: .medium))
+                                                        .foregroundStyle(DS.Color.label3)
+
+                                                    Text("·")
+                                                        .font(.system(size: 11))
+                                                        .foregroundStyle(DS.Color.label3)
+
+                                                    // Full type name
+                                                    Text(entry.typeDisplayName)
+                                                        .font(.system(size: 11))
+                                                        .foregroundStyle(DS.Color.label3)
+                                                }
+
+                                                // Value preview
+                                                Text(String(entry.value.prefix(30))
+                                                     + (entry.value.count > 30 ? "…" : ""))
+                                                    .font(.system(size: 10, design: .monospaced))
+                                                    .foregroundStyle(DS.Color.label3.opacity(0.7))
+                                                    .lineLimit(1)
+                                            }
+
+                                            Spacer()
+
+                                            // Primary indicator / select
+                                            if entry.isPrimary {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .font(.system(size: 20))
+                                                    .foregroundStyle(DS.Color.success)
+                                            } else {
+                                                Image(systemName: "circle")
+                                                    .font(.system(size: 20))
+                                                    .foregroundStyle(DS.Color.label3)
+                                            }
+                                        }
+                                        .padding(.vertical, 14)
+                                        .padding(.horizontal, DS.Layout.cardPadding)
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(PressEffectButtonStyle())
+
+                                    if idx < qrManager.entries.count - 1 {
+                                        Divider()
+                                            .padding(.leading, DS.Layout.cardPadding + 58)
+                                            .opacity(0.35)
+                                    }
+                                }
+                            }
+                        }
+                        .cardStyle()
+                        .padding(.horizontal, DS.Layout.screenPadding)
+                        .padding(.top, 12)
+                    }
+                }
+            }
+            .navigationTitle("Set Primary Code")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(DS.Color.accent)
+                }
+            }
+        }
     }
 }
 

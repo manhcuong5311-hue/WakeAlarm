@@ -319,7 +319,7 @@ struct QRDismissSheet: View {
                 .padding(.bottom, 20)
 
                 if scanVM.cameraPermissionGranted {
-                    QRScannerView { scanVM.handleScanned(value: $0) }
+                    QRScannerView { value, _ in scanVM.handleScanned(value: value) }
                         .ignoresSafeArea(edges: .bottom)
                 } else {
                     Spacer()

@@ -16,6 +16,16 @@ final class HomeViewModel: ObservableObject {
     init() {
         // Mirror published values from singleton managers
         AlarmManager.shared.$alarms
+            .map { alarms in
+                alarms.sorted { a, b in
+                    let cal = Calendar.current
+                    let aH = cal.component(.hour,   from: a.time) * 60
+                             + cal.component(.minute, from: a.time)
+                    let bH = cal.component(.hour,   from: b.time) * 60
+                             + cal.component(.minute, from: b.time)
+                    return aH < bH
+                }
+            }
             .receive(on: DispatchQueue.main)
             .assign(to: &$alarms)
 

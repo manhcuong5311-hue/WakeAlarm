@@ -9,7 +9,8 @@ import AVFoundation
 /// for accurate detection regardless of code shape/density.
 struct QRScannerView: UIViewRepresentable {
 
-    var onDetected: (String) -> Void
+    /// Called with (rawValue, codeTypeRawValue) on a successful scan.
+    var onDetected: (String, String) -> Void
 
     func makeUIView(context: Context) -> ScannerUIView {
         let view = ScannerUIView()
@@ -30,7 +31,7 @@ struct QRScannerView: UIViewRepresentable {
 
     final class ScannerUIView: UIView, AVCaptureMetadataOutputObjectsDelegate {
 
-        var onDetected: ((String) -> Void)?
+        var onDetected: ((String, String) -> Void)?
 
         private var captureSession: AVCaptureSession?
         private var previewLayer: AVCaptureVideoPreviewLayer?
@@ -128,7 +129,6 @@ struct QRScannerView: UIViewRepresentable {
 
             // Clear rectangle cutout in the middle
             // Using a CAShapeLayer mask so the centre is transparent
-            let cutoutSize = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) * 0.65
             let maskLayer = CAShapeLayer()
             dimView.layer.mask = maskLayer
 
@@ -233,7 +233,7 @@ struct QRScannerView: UIViewRepresentable {
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
 
-            onDetected?(value)
+            onDetected?(value, raw.type.rawValue)
         }
     }
 }

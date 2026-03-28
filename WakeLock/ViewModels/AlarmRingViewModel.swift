@@ -67,10 +67,19 @@ final class AlarmRingViewModel: ObservableObject {
         NotificationService.shared.cancelBurst(alarmIdString: alarm.id.uuidString)
         NotificationService.shared.cancelQRNag(alarmIdString: alarm.id.uuidString)
 
-        // For repeating alarms: the primary `UNCalendarNotificationTrigger(repeats: true)`
-        // fires again automatically on the next occurrence, but the pre-emptive burst
-        // notifications were consumed by this dismissal.  Re-call schedule() so a fresh
-        // set of pre-emptive bursts is queued for the next occurrence.
+        // Remove the delivered primary alarm notification from the notification
+        // centre so AppCoordinator.handleAppDidBecomeActive cannot find it and
+        // re-present the ring screen when the app cycles through inactive→active
+        // (which happens every time the Face-ID system prompt closes).
+        NotificationService.shared.clearDeliveredAlarm(alarmId: alarm.id.uuidString)
+
+        // Tell the coordinator this alarm was just dismissed.  This prevents a
+        // 6-second re-activation window even if the notification centre still
+        // has a stale entry (belt-and-suspenders guard).
+        AppCoordinator.shared.markDismissed(alarm.id)
+
+        // For repeating alarms: re-queue a fresh set of pre-emptive bursts for
+        // the next occurrence (the ones queued at creation were consumed).
         if alarm.repeatPattern != .once {
             NotificationService.shared.schedule(alarm)
         }

@@ -72,7 +72,16 @@ struct RingScreenHost: View {
     var body: some View {
         AlarmRingView(vm: ringVM)
             .onChange(of: ringVM.isDismissed) { _, dismissed in
-                if dismissed { coordinator.dismissRingScreen() }
+                if dismissed {
+                    coordinator.dismissRingScreen()
+                    // If a second alarm fired while this ring screen was visible
+                    // (its notification was held back to avoid switching screens),
+                    // present its ring screen now.  Small delay lets SwiftUI finish
+                    // tearing down the current fullScreenCover first.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        coordinator.checkForNextAlarm()
+                    }
+                }
             }
             .onChange(of: scenePhase) { _, phase in
                 // Recovery: when the app returns to foreground, ensure audio and

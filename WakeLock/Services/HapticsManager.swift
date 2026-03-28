@@ -41,7 +41,10 @@ final class HapticsManager {
 
     // MARK: - Haptic phase tracking
 
-    private enum HapticPhase { case idle, phase1, phase2, phase3 }
+    // Explicitly Equatable & Sendable so the conformance is nonisolated and
+    // can be used inside Timer / NotificationCenter closures without triggering
+    // Swift 6 "Main actor-isolated conformance in nonisolated context" errors.
+    private enum HapticPhase: Equatable, Sendable { case idle, phase1, phase2, phase3 }
     private var currentPhase: HapticPhase = .idle
 
     // MARK: - Engine + player
@@ -96,9 +99,9 @@ final class HapticsManager {
         heartbeatTimer?.invalidate(); heartbeatTimer = nil
         fallbackTimer?.invalidate();  fallbackTimer  = nil
 
-        try? player?.stop(atTime: CHHapticTimeImmediate)
+        try? player?.stop(atTime: CHHapticTimeImmediate)  // player.stop(atTime:) throws
         player = nil
-        try? engine?.stop()
+        engine?.stop()   // CHHapticEngine.stop() is non-throwing (completion-handler variant)
     }
 
     /// Restart haptics for the current phase without changing the phase.

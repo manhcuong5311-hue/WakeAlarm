@@ -18,6 +18,13 @@ final class AppCoordinator: NSObject, ObservableObject, UNUserNotificationCenter
     /// When non-nil the ring screen is presented full-screen.
     @Published var activeAlarmId: UUID? = nil
 
+    /// Alarm IDs dismissed within the last few seconds.
+    /// Prevents `handleAppDidBecomeActive` from immediately re-triggering the
+    /// ring screen after a Face-ID dismissal (the system transitions the app
+    /// through inactive→active when the Face-ID prompt closes, which causes
+    /// `getDeliveredNotifications` to find stale alarm notifications).
+    private var recentlyDismissedIds = Set<UUID>()
+
     override init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
@@ -45,12 +52,17 @@ final class AppCoordinator: NSObject, ObservableObject, UNUserNotificationCenter
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        let userInfo = notification.request.content.userInfo
+        let userInfo  = notification.request.content.userInfo
+        let notifType = userInfo["notificationType"] as? String
 
-        // Suppress burst / nag notifications that fire after the alarm was already
-        // dismissed (stale pre-scheduled notifications still in the system queue).
-        let isAlarmRelated = userInfo["alarmId"] != nil
-        if isAlarmRelated && !PunishmentEngine.shared.isRunning {
+        // Suppress stale burst/nag notifications that fire after an alarm was
+        // already dismissed (they couldn't all be cancelled in time).
+        // IMPORTANT: only suppress burst/nag — never suppress a primary "alarm"
+        // notification, because it could belong to a *different* alarm that is
+        // legitimately firing right now (e.g. two alarms set close together).
+        let isStale = (notifType == "burst" || notifType == "nag")
+                   && !PunishmentEngine.shared.isRunning
+        if isStale {
             completionHandler([])
             return
         }
@@ -96,6 +108,42 @@ final class AppCoordinator: NSObject, ObservableObject, UNUserNotificationCenter
         activeAlarmId = nil
     }
 
+    /// After the current alarm is dismissed, look for any other alarm notification
+    /// that fired while the ring screen was occupied (e.g. two alarms set close
+    /// together) and present the next ring screen automatically.
+    ///
+    /// Call this right after `dismissRingScreen()` — `activeAlarmId` will be nil
+    /// by then, and `recentlyDismissedIds` will filter out the just-dismissed alarm.
+    func checkForNextAlarm() {
+        guard activeAlarmId == nil else { return }
+        UNUserNotificationCenter.current().getDeliveredNotifications { [weak self] delivered in
+            guard let self else { return }
+            // Find the first delivered notification for an alarm that is not
+            // in the recent-dismissal cooldown window.
+            guard let match = delivered.first(where: {
+                guard let idStr = $0.request.content.userInfo["alarmId"] as? String,
+                      let id    = UUID(uuidString: idStr) else { return false }
+                return !self.recentlyDismissedIds.contains(id)
+            }) else { return }
+
+            DispatchQueue.main.async {
+                self.handleAlarmNotification(
+                    match.request.content.userInfo,
+                    notificationId: match.request.identifier
+                )
+            }
+        }
+    }
+
+    /// Record a dismissed alarm ID for a short window so `activateAlarm` cannot
+    /// immediately re-present the ring screen (e.g. after a Face-ID prompt).
+    func markDismissed(_ id: UUID) {
+        recentlyDismissedIds.insert(id)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
+            self?.recentlyDismissedIds.remove(id)
+        }
+    }
+
     // =========================================================================
     // MARK: - Private: notification routing
     // =========================================================================
@@ -115,7 +163,18 @@ final class AppCoordinator: NSObject, ObservableObject, UNUserNotificationCenter
         guard let idStr = userInfo["alarmId"] as? String,
               let id    = UUID(uuidString: idStr) else { return }
 
-        // Show the ring screen (no-op if already visible)
+        // ── Multi-alarm guard ─────────────────────────────────────────────────
+        // If a DIFFERENT alarm's ring screen is already showing, do NOT switch
+        // to this one or extend its burst chain.  The notification still appears
+        // as a banner (completionHandler([.sound, .banner]) in willPresent).
+        // When the current alarm is dismissed, checkForNextAlarm() will find
+        // this notification's alarmId in the delivered list and present its
+        // ring screen automatically.
+        if let currentId = activeAlarmId, currentId != id {
+            return
+        }
+
+        // Show the ring screen (no-op if already visible for the same alarm)
         activateAlarm(id: id)
 
         // Detect any burst notification type:
@@ -152,6 +211,10 @@ final class AppCoordinator: NSObject, ObservableObject, UNUserNotificationCenter
     private func activateAlarm(id: UUID) {
         DispatchQueue.main.async {
             guard self.activeAlarmId != id else { return }
+            guard !self.recentlyDismissedIds.contains(id) else {
+                print("[AppCoordinator] Blocked re-activation of recently dismissed alarm \(id)")
+                return
+            }
             self.activeAlarmId = id
         }
     }
@@ -247,10 +310,14 @@ final class AppCoordinator: NSObject, ObservableObject, UNUserNotificationCenter
             guard let self else { return }
 
             // ── Path A: a notification was already delivered ──────────────────
-            // Prefer the most recent alarm notification so we always surface
-            // the right alarm when multiple are pending (edge case).
+            // Skip any alarms that were dismissed in the last few seconds so
+            // a Face-ID / QR dismissal doesn't immediately re-show the same
+            // alarm, and also skip any alarm that is currently being dismissed
+            // (race between removeDeliveredNotifications and getDelivered).
             if let match = delivered.first(where: {
-                $0.request.content.userInfo["alarmId"] != nil
+                guard let idStr = $0.request.content.userInfo["alarmId"] as? String,
+                      let id    = UUID(uuidString: idStr) else { return false }
+                return !self.recentlyDismissedIds.contains(id)
             }) {
                 print("[AppCoordinator] App became active — found unhandled alarm " +
                       "notification '\(match.request.identifier)', presenting ring screen.")
